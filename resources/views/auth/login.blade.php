@@ -1,33 +1,3 @@
-{{-- @extends('layouts.auth')
-
-@section('content')
-<h1 class="mb-4">Login</h1>
-@if (session('success'))
-<div class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
-<form method="POST" action="{{ route('postLogin') }}" novalidate>
-    @csrf
-    <div class="mb-3">
-        <label for="title" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
-        @error('email')
-        <div class="text-danger">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="mb-3">
-        <label for="title" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" required>
-        @error('password')
-        <div class="text-danger">{{ $message }}</div>
-        @enderror
-    </div>
-    <button type="submit" class="btn btn-success">Login</button>
-    <a href="{{ route('register') }}">Register</a>
-</form>
-@endsection --}}
-
 @extends('layouts.auth')
 
 @section('content')
