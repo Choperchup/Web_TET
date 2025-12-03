@@ -18,12 +18,11 @@ return new class extends Migration
             $table->text('content'); //Nội dung bài viết
             $table->string('thumbnail')->nullable(); //Ảnh đại diện bài viết
 
+            // Khóa ngoại category_id trỏ tới bảng 'post_categories'
+            $table->foreignId('category_id')->constrained('post_categories')->onDelete('cascade'); // ID danh mục bài viết (Trỏ đến bảng post_categories)
 
-            $table->unsignedBigInteger('category_id'); //ID danh mục bài viết
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-
-            $table->unsignedBigInteger('user_id'); //ID tác giả bài viết
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // Khóa ngoại user_id trỏ tới bảng 'users'
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // ID tác giả bài viết
 
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft'); //Trạng thái bài viết
             $table->timestamp('published_at')->nullable(); // Thời điểm xuất bản
@@ -31,6 +30,9 @@ return new class extends Migration
             // SEO metadata
             $table->string('meta_title')->nullable(); //Tiêu đề SEO
             $table->text('meta_description')->nullable(); //Mô tả SEO
+
+            // THÊM CỘT MỚI: Bài viết nổi bật (featured)
+            $table->boolean('featured')->default(false);
 
             $table->softDeletes(); //Xóa mềm
 

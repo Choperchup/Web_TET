@@ -150,15 +150,9 @@ class AdminPostController extends Controller
      * @param Posts $posts
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Posts $posts)
+    public function update(AdminStorePost $request, Posts $posts)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'thumbnail' => 'nullable|image|max:2048',
-            'status' => 'nullable|in:draft,published,archived',
-        ]);
-
+        // handle thumbnail
         if ($request->hasFile('thumbnail')) {
             // delete old
             if ($posts->thumbnail && Storage::disk('public')->exists($posts->thumbnail)) {

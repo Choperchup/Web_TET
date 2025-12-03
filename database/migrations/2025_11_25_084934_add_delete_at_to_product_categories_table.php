@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->boolean('featured')->default(false)->after('meta_description');
+        Schema::table('product_categories', function (Blueprint $table) {
+            $table->softDeletes()->after('updated_at'); // Thêm cột deleted_at để hỗ trợ xóa mềm
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn('featured');
+        Schema::table('product_categories', function (Blueprint $table) {
+            $table->dropSoftDeletes();
         });
     }
 };

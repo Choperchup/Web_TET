@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class Categories extends Model
 {
     use SoftDeletes, HasFactory;
-    protected $table = 'categories';
+    protected $table = 'post_categories';
 
     protected $fillable = [
         'name',

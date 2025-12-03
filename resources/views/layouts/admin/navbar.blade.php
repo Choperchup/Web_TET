@@ -24,7 +24,7 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="productDropdown">
                         <!-- Quản lý Sản phẩm (Danh sách) -->
-                        <li><a class="dropdown-item" href="#">
+                        <li><a class="dropdown-item" href="{{ route('admin.products.index') }}">
                                 <i class="bi bi-list-columns me-2"></i> Danh sách Sản phẩm
                             </a></li>
                         <!-- Thêm Sản phẩm -->
@@ -42,10 +42,21 @@
                 </li>
 
                 <!--Quản lý phân loại-->
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('admin.categories.index') }}">
-                        <i class="bi bi-newspaper me-1"></i> Quản lý phân loại
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="productDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-box-fill me-1"></i> Quản lý Phân loại
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="productDropdown">
+                        <!-- Quản lý Sản phẩm (Danh sách) -->
+                        <li><a class="dropdown-item" href="{{ route('admin.categories.index') }}">
+                                <i class="bi bi-list-columns me-2"></i> Phân loại Bài viết
+                            </a></li>
+                        <!-- Thêm Sản phẩm -->
+                        <li><a class="dropdown-item" href="{{ route('admin.product-categories.index') }}">
+                                <i class="bi bi-list-columns me-2"></i> Phân loại Sản phẩm
+                            </a></li>
+                    </ul>
                 </li>
 
                 <!-- Quản lý Tiêu thụ (thường là Đơn hàng/Báo cáo) -->

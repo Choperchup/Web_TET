@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AdminStorePost extends FormRequest
+class AdminStoreProductCategories extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,11 @@ class AdminStorePost extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'category_id' => 'required|exists:post_categories,id',
-            'status' => 'nullable|in:draft,published,archived',
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|unique:product_categories,slug|max:255',
+            'description' => 'nullable|string',
+            'name.required' => 'Tên danh mục không được để trống.',
+            'slug.unique' => 'Đường dẫn thân thiện (slug) này đã tồn tại.',
         ];
     }
 }

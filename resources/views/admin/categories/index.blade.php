@@ -4,7 +4,7 @@
     <div class="container my-5">
         <div class="row">
             <div class="col-12">
-                <h1 class="h3 mb-4 pb-2 border-bottom text-dark">Quản Lý Danh Mục</h1>
+                <h1 class="h3 mb-4 pb-2 border-bottom text-dark">Danh Mục Bài Viết</h1>
 
                 <!-- Hiển thị thông báo (nếu có) -->
                 @if (session('success'))
@@ -17,11 +17,23 @@
                 <!-- Nút Tạo Mới -->
                 <div class="d-flex gap-2 justify-content-end mb-3">
                     <a href="{{ route('admin.categories.create') }}" class="btn btn-primary shadow-sm">
-                        + Thêm Danh Mục Mới
+                        Thêm Danh Mục Mới
                     </a>
                     <a href="{{ route('admin.categories.trash') }}" class="btn btn-warning shadow-sm"><i
                             class="bi bi-trash"></i> Thùng rác
                     </a>
+                </div>
+
+                {{-- Khối Tìm kiếm (Giữ nguyên) --}}
+                <div class="d-flex justify-content-end mb-3">
+                    <form action="#" method="GET" class="d-flex align-items-center">
+                        <input type="hidden" name="status" value="#">
+                        <input type="text" name="q" placeholder="Tìm theo tên..." value="{{ request('q') }}"
+                            class="form-control form-control-sm me-2" style="width: 250px;">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            Tìm kiếm
+                        </button>
+                    </form>
                 </div>
 
                 <!-- Bảng Danh Mục -->
