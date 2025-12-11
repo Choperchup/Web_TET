@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminProductCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminOrderController;
 
 Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -97,4 +98,12 @@ Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
 
     // toggle status
     Route::post('/dashboard/products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('admin.products.toggle_status');
+});
+
+Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
+    Route::get('/dashboard/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('/dashboard/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+    Route::post('/dashboard/orders/{order}/confirm', [AdminOrderController::class, 'confirm'])->name('admin.orders.confirm');
+    Route::post('/dashboard/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('admin.orders.cancel');
+    Route::put('/dashboard/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
 });

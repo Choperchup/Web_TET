@@ -61,8 +61,14 @@
 
                 <!-- Quản lý Tiêu thụ (thường là Đơn hàng/Báo cáo) -->
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#">
+                    <a class="nav-link text-white" href="{{ route('admin.orders.index') }}">
                         <i class="bi bi-graph-up-arrow me-1"></i> Quản lý Tiêu thụ
+                    </a>
+                </li>
+
+                <li>
+                    <a href="">
+
                     </a>
                 </li>
             </ul>

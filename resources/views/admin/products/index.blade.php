@@ -32,13 +32,20 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <form method="GET" action="{{ route('admin.products.index') }}" class="row g-3 align-items-center">
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <input type="search" name="q" class="form-control"
                                     placeholder="Tìm kiếm theo tên sản phẩm..." value="{{ request('q') }}">
                             </div>
+                            <div class="col-md-3">
+                                <select name="status" class="form-select">
+                                    <option value="">-- Chọn trạng thái --</option>
+                                    <option value="published" @if(request('status') == 'published') selected @endif>Hoạt động</option>
+                                    <option value="draft" @if(request('status') == 'draft') selected @endif>Tạm ẩn</option>
+                                </select>
+                            </div>
                             <div class="col-md-4 text-end">
                                 <button type="submit" class="btn btn-dark">Tìm kiếm</button>
-                                @if (request('q'))
+                                @if (request('q') || request('status'))
                                     <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">Xóa tìm
                                         kiếm</a>
                                 @endif

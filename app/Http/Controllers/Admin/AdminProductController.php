@@ -27,6 +27,11 @@ class AdminProductController extends Controller
             $query->where('name', 'like', "%{$request->q}%");
         }
 
+        // Lọc theo trạng thái nếu có
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $products = $query->latest()->paginate(10)->appends($request->query());
 
         return view('admin.products.index', compact('products'));
