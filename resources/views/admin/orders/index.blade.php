@@ -34,8 +34,11 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
+                    @if (request()->has('q') || request()->has('status'))
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Xóa</a>
+                    @endif
                 </div>
             </form>
         </div>

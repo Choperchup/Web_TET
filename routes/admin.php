@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminCategoriesController;
-use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminProductCategoryController;
@@ -9,7 +10,21 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminOrderController;
 
 Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+});
+
+//NGƯỜI DÙNG QUẢN TRỊ
+Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
+    Route::get('/dashboard/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('/dashboard/users/create', [UserController::class, 'create'])->name('admin.users.create');
+    Route::post('/dashboard/users/store', [UserController::class, 'store'])->name('admin.users.store');
+    Route::get('/dashboard/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/dashboard/users/{user}/update', [UserController::class, 'update'])->name('admin.users.update');
+    Route::delete('/dashboard/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::delete('/dashboard/users/force-delete', [UserController::class, 'forceDeleteAll'])->name('admin.users.forceDeleteAll');
+    Route::delete('/dashboard/users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('admin.users.forceDelete');
+    Route::put('/dashboard/users/{id}/restore', [UserController::class, 'restore'])->name('admin.users.restore');
+    Route::get('/dashboard/users/trash', [UserController::class, 'trash'])->name('admin.users.trash');
 });
 
 // Quản lý bài viết

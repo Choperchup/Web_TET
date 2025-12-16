@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin\Order; // Đảm bảo import Model Order
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UpdatePasswordRequest;
+
 
 class UserController extends Controller
 {
@@ -16,8 +19,14 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
-        return view('users.index', compact('users'));
+        // Lấy danh sách Admin (Giả định User::ROLE_ADMIN là 'admin')
+        $adminUsers = User::where('role', User::ROLE_ADMIN)->get();
+
+        // Lấy danh sách Users thường (Giả định User::ROLE_USER là 'user')
+        $regularUsers = User::where('role', User::ROLE_USER)->get();
+
+        // Truyền cả hai danh sách vào view
+        return view('admin.users.index', compact('adminUsers', 'regularUsers'));
     }
 
     /**
@@ -25,7 +34,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        return view('admin.users.create');
     }
 
     /**
@@ -37,9 +46,10 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role ?? User::ROLE_USER,
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully!');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully!');
     }
 
     /**
@@ -53,25 +63,72 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        return view('admin.users.edit', compact('user'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        // Thêm validation cho role và unique email
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|in:' . User::ROLE_ADMIN . ',' . User::ROLE_USER,
+            // Thêm logic password nếu Admin muốn reset
+        ]);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+        ]);
+
+        // Chuyển hướng về route Admin mới
+        return redirect()->route('admin.users.index')->with('success', 'User ' . $user->name . ' updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+        // Chuyển hướng về route Admin mới
+        return redirect()->route('admin.users.index')->with('success', 'User ' . $user->name . ' deleted successfully!');
+    }
+
+    /**
+     * Hiển thị thùng rác người dùng đã xóa mềm.
+     */
+
+    public function trash()
+    {
+        $users = User::onlyTrashed()->paginate(10);
+        return view('admin.users.trash', compact('users'));
+    }
+
+    /**
+     * Khôi phục người dùng từ thùng rác.
+     */
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+        return redirect()->route('admin.users.trash')->with('success', 'User ' . $user->name . ' restored successfully!');
+    }
+
+    /**
+     * Xóa vĩnh viễn người dùng khỏi hệ thống.
+     */
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->forceDelete();
+        return redirect()->route('admin.users.trash')->with('success', 'User ' . $user->name . ' permanently deleted!');
     }
 
     /**
@@ -103,5 +160,47 @@ class UserController extends Controller
 
         // 3. Trả về view chi tiết
         return view('users.orders.show', compact('order'));
+    }
+
+    /**
+     * Hiển thị trang profile cá nhân của người dùng hiện tại.
+     */
+    public function profile()
+    {
+        $user = Auth::user(); // Lấy thông tin người dùng đang đăng nhập
+        return view('users.profile.index', compact('user'));
+    }
+
+    /**
+     * Xử lý cập nhật thông tin cá nhân (Tên, SĐT, Địa chỉ).
+     */
+    public function updateProfile(UpdateProfileRequest $request)
+    {
+        $user = Auth::user();
+
+        // 2. Cập nhật
+        $user->update([
+            'name' => $request->name,
+            'phone_number' => $request->phone_number,
+            'address' => $request->address,
+        ]);
+
+        return redirect()->route('user.profile')->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
+    }
+
+    /**
+     * Xử lý đổi mật khẩu.
+     */
+    public function updatePassword(UpdatePasswordRequest $request)
+    {
+        $user = Auth::user();
+
+
+        // 3. Cập nhật mật khẩu mới
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('user.profile')->with('success', 'Mật khẩu đã được đổi thành công!');
     }
 }

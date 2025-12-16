@@ -47,7 +47,9 @@
             </div>
             <div class="col-md-3 d-flex gap-2">
                 <button class="btn btn-secondary">Lọc</button>
-                <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Clear</a>
+                @if (request()->has('q') || request()->has('category_id') || request()->has('status'))
+                    <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary">Clear</a>
+                @endif
             </div>
         </form>
 

@@ -13,17 +13,6 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderTrackingController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/about', [HomeController::class, 'about'])->name('about');
-
-// --- CÁC ROUTE CHO NGƯỜI DÙNG (USERS) ---
-Route::prefix('users')->controller(UserController::class)
-    ->name('users.')->group(function () {
-        Route::get('/', 'index')->name('index');
-
-        Route::get('/create', 'create')->name('create');
-
-        Route::post('/store', 'store')->name('store');
-    });
 
 // --- CÁC ROUTE CÔNG KHAI CHO BÀI VIẾT (POSTS) ---
 Route::prefix('posts')->controller(PostController::class)->group(function () {
@@ -79,8 +68,7 @@ Route::middleware('auth')->prefix('user/orders')->controller(UserController::cla
     Route::get('/{order}', 'ordersShow')->name('users.orders.show');
 });
 
-Route::middleware('auth')->prefix('categories')->controller(CategoryController::class)->group(function () {});
-
+// --- CÁC ROUTE CHO XÁC THỰC NGƯỜI DÙNG (AUTHENTICATION) ---
 Route::get('register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [AuthController::class, 'postRegister'])->name('postRegister');
 
@@ -88,3 +76,12 @@ Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'postLogin'])->name('postLogin');
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// --- CÁC ROUTE CHO NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP (USER PROFILE) ---
+Route::middleware('auth')->group(function () {
+    // Route Profile
+    Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
+    Route::put('/password/update', [UserController::class, 'updatePassword'])->name('user.password.update');
+});

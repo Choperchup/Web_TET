@@ -62,13 +62,13 @@
                 <!-- Quản lý Tiêu thụ (thường là Đơn hàng/Báo cáo) -->
                 <li class="nav-item">
                     <a class="nav-link text-white" href="{{ route('admin.orders.index') }}">
-                        <i class="bi bi-graph-up-arrow me-1"></i> Quản lý Tiêu thụ
+                        <i class="bi bi-graph-up-arrow me-1"></i> Đơn hàng
                     </a>
                 </li>
 
                 <li>
-                    <a href="">
-
+                    <a href="{{ route('admin.users.index') }}" class="nav-link text-white">
+                        <i class="bi bi-people-fill me-1"></i> Quản lý Người dùng
                     </a>
                 </li>
             </ul>

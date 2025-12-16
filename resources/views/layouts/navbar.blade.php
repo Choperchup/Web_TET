@@ -34,14 +34,19 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
                         <li>
-                            {{-- Thêm kiểm tra Auth::user()->is_admin hoặc tương tự --}}
-                            <a class="dropdown-item" href="{{ route('admin.dashboard') ?? '#' }}">
-                                <i class="bi bi-speedometer me-2"></i> Trang quản trị
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-person-circle me-2"></i> Thông tin cá nhân
+                            <a class="dropdown-item" href="
+                                                                                            @if(Auth::user()->role == 'admin')
+                                                                                                {{ route('admin.dashboard') }}
+                                                                                            @else
+                                                                                                {{ route('user.profile') }}
+                                                                                            @endif
+                                                                                        ">
+                                <i class="bi bi-speedometer me-2"></i>
+                                @if(Auth::user()->role == 'admin')
+                                    Trang quản trị
+                                @else
+                                    Thông tin cá nhân
+                                @endif
                             </a>
                         </li>
                         {{-- ✨ THÊM LỐI VÀO XEM ĐƠN HÀNG CỦA TÔI (Tùy chọn) ✨ --}}
