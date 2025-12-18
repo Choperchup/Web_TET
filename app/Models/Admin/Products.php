@@ -13,6 +13,11 @@ class Products extends Model
 
     protected $table = 'products';
 
+    protected $casts = [
+        'is_featured' => 'boolean',
+        'is_on_sale' => 'boolean',
+    ];
+
     protected $fillable = [
         'category_id',
         'user_id',
@@ -29,6 +34,7 @@ class Products extends Model
         'is_featured',
         'meta_title',
         'meta_description',
+        'is_on_sale',
     ];
 
     /**

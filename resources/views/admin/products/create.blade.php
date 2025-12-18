@@ -10,7 +10,6 @@
 
                 <div class="card shadow-lg">
                     <div class="card-body p-4">
-                        {{-- Quan trọng: Thêm enctype="multipart/form-data" để upload file --}}
                         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
@@ -42,7 +41,6 @@
                                     <select name="category_id" id="category_id" required
                                         class="form-select @error('category_id') is-invalid @enderror">
                                         <option value="">-- Chọn Danh mục --</option>
-                                        {{-- Giả định biến $categories chứa danh sách ProductCategory --}}
                                         @foreach ($categories as $category)
                                             <option value="{{ $category->id }}"
                                                 {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -55,9 +53,9 @@
                                     @enderror
                                 </div>
 
-                                {{-- Giá Bán --}}
+                                {{-- Giá Bán Gốc --}}
                                 <div class="col-md-6 mb-3">
-                                    <label for="price" class="form-label">Giá Bán (VNĐ) <span
+                                    <label for="price" class="form-label">Giá Bán Gốc (VNĐ) <span
                                             class="text-danger">*</span></label>
                                     <input type="number" name="price" id="price" value="{{ old('price') }}" required
                                         class="form-control @error('price') is-invalid @enderror">
@@ -65,6 +63,27 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                {{-- ✨ Bổ sung: Giá Khuyến Mãi/Sale Price --}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="sale_price" class="form-label">Giá Khuyến Mãi (VNĐ) <span class="text-muted">(Không bắt buộc)</span></label>
+                                    <input type="number" name="sale_price" id="sale_price" value="{{ old('sale_price') }}"
+                                        class="form-control @error('sale_price') is-invalid @enderror">
+                                    @error('sale_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                {{-- ✅ BỔ SUNG: SKU (Mã Sản Phẩm) --}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU (Mã Sản Phẩm)</label>
+                                    <input type="text" name="sku" id="sku" value="{{ old('sku') }}"
+                                        class="form-control @error('sku') is-invalid @enderror">
+                                    @error('sku')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- END BỔ SUNG: SKU --}}
 
                                 {{-- Tồn Kho --}}
                                 <div class="col-md-6 mb-3">
@@ -82,30 +101,8 @@
                                     <label for="thumbnail" class="form-label">Ảnh Thumbnail</label>
                                     <input type="file" name="thumbnail" id="thumbnail"
                                         class="form-control @error('thumbnail') is-invalid @enderror"
-                                        accept="image/*"> {{-- Chấp nhận mọi định dạng ảnh --}}
+                                        accept="image/*">
                                     @error('thumbnail')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                {{-- Mô tả Ngắn (Mới thêm) --}}
-                                <div class="col-12 mb-4">
-                                    <label for="short_description" class="form-label">Mô tả Ngắn (Hiển thị tóm tắt)</label>
-                                    <textarea name="short_description" id="short_description" rows="2"
-                                        class="form-control @error('short_description') is-invalid @enderror">{{ old('short_description') }}</textarea>
-                                    @error('short_description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                {{-- Mô tả Chi tiết/Nội dung (Đổi tên trường từ 'description' sang 'content' để khớp DB) --}}
-                                <div class="col-12 mb-4">
-                                    <label for="content" class="form-label">Nội dung Chi tiết Sản Phẩm <span class="text-danger">*</span></label>
-                                    {{-- ĐÃ SỬA: name="description" -> name="content" --}}
-                                    <textarea name="content" id="content" rows="5" required
-                                        class="form-control @error('content') is-invalid @enderror">{{ old('content') }}</textarea>
-                                    @error('content')
-                                        {{-- ĐÃ SỬA: @error('description') -> @error('content') --}}
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -113,7 +110,7 @@
                                 {{-- Kích hoạt/Trạng thái & Nổi bật --}}
                                 <div class="col-md-6 mb-3 d-flex align-items-center pt-4">
                                     <div class="form-check form-switch me-4">
-                                        {{-- Checkbox này sẽ được Controller map sang status ENUM ('published'/'draft') --}}
+                                        {{-- Mặc định 'checked' (published) nếu không có old('is_active') --}}
                                         <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
                                             value="1" {{ old('is_active', true) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">Kích hoạt (Hiển thị ra ngoài)</label>
@@ -124,10 +121,27 @@
                                             value="1" {{ old('is_featured') ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_featured">Sản phẩm Nổi bật</label>
                                     </div>
-                                    
                                 </div>
 
+                                {{-- Mô tả Ngắn --}}
+                                <div class="col-12 mb-4">
+                                    <label for="short_description" class="form-label">Mô tả Ngắn (Hiển thị tóm tắt)</label>
+                                    <textarea name="short_description" id="short_description" rows="2"
+                                        class="form-control @error('short_description') is-invalid @enderror">{{ old('short_description') }}</textarea>
+                                    @error('short_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
+                                {{-- Mô tả Chi tiết/Nội dung (Đã bỏ dấu * để đồng bộ với Edit) --}}
+                                <div class="col-12 mb-4">
+                                    <label for="content" class="form-label">Nội dung Chi tiết Sản Phẩm</label>
+                                    <textarea name="content" id="content" rows="5"
+                                        class="form-control @error('content') is-invalid @enderror">{{ old('content') }}</textarea>
+                                    @error('content')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-end">

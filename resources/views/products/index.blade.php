@@ -12,6 +12,69 @@
         </div>
     @endif
 
+    {{-- THANH CÔNG CỤ LỌC NGANG (Giữ nguyên) --}}
+    <div class="card shadow-sm p-3 mb-4">
+        {{-- ... Form lọc giữ nguyên ... --}}
+        <form action="{{ route('products.index') }}" method="GET" class="row g-3 align-items-end">
+            
+            {{-- Lọc theo Danh mục (3 cột) --}}
+            <div class="col-md-3 col-sm-6">
+                <label for="category_id" class="form-label small fw-semibold text-primary">
+                    <i class="fas fa-list-alt me-1"></i> Danh mục
+                </label>
+                <select name="category_id" id="category_id" class="form-select form-select-sm">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}" 
+                            {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Lọc theo Giá Tối thiểu (2 cột) --}}
+            <div class="col-md-2 col-sm-6">
+                <label for="price_min" class="form-label small fw-semibold text-success">
+                    Giá tối thiểu
+                </label>
+                <input type="number" name="price_min" id="price_min" class="form-control form-control-sm" 
+                    placeholder="VD: 50000" value="{{ request('price_min') }}">
+            </div>
+
+            {{-- Lọc theo Giá Tối đa (2 cột) --}}
+            <div class="col-md-2 col-sm-6">
+                <label for="price_max" class="form-label small fw-semibold text-danger">
+                    Giá tối đa
+                </label>
+                <input type="number" name="price_max" id="price_max" class="form-control form-control-sm" 
+                    placeholder="VD: 500000" value="{{ request('price_max') }}">
+            </div>
+            
+            {{-- Tìm kiếm theo Tên (3 cột) --}}
+            <div class="col-md-3 col-sm-6">
+                <label for="search" class="form-label small fw-semibold text-info">
+                    <i class="fas fa-search me-1"></i> Tìm kiếm theo Tên
+                </label>
+                <input type="text" name="search" id="search" class="form-control form-control-sm" 
+                    placeholder="Nhập tên sản phẩm..." value="{{ request('search') }}">
+            </div>
+
+            {{-- Nút Áp dụng và Xóa (2 cột) --}}
+            <div class="col-md-2 col-sm-6 d-flex justify-content-end">
+                <button type="submit" class="btn btn-dark btn-sm me-2 fw-bold w-100">
+                    <i class="fas fa-search me-1"></i> Tìm
+                </button>
+                @if (request()->hasAny(['category_id', 'price_min', 'price_max', 'search']))
+                    <a href="{{ route('products.index') }}" class="btn btn-outline-dark btn-sm w-100">
+                        <i class="fas fa-times me-1"></i> Xóa Lọc
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    {{-- Danh sách sản phẩm --}}
     <div class="row">
         @forelse ($products as $product)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
@@ -28,7 +91,9 @@
                         @if ($product->is_featured)
                             <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">Nổi bật</span>
                         @endif
-                        @if ($product->sale_price < $product->price && $product->sale_price > 0)
+                        
+                        {{-- ✅ ĐÃ SỬA: Thêm điều kiện $product->is_on_sale --}}
+                        @if ($product->sale_price < $product->price && $product->sale_price > 0 && $product->is_on_sale)
                             <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
                         @endif
                     </a>
@@ -42,38 +107,36 @@
                         </h5>
 
                         {{-- Giá --}}
-                        <div class="mt-2 mb-3">
-                            @if ($product->sale_price > 0 && $product->sale_price < $product->price)
-                                <span class="text-danger fw-bold fs-5 me-2">{{ number_format($product->sale_price) }} VNĐ</span>
-                                <del class="text-muted small">{{ number_format($product->price) }} VNĐ</del>
-                            @else
-                                <span class="text-primary fw-bold fs-5">{{ number_format($product->price) }} VNĐ</span>
-                            @endif
-                        </div>
+                        <div class="mt-auto">
+                                {{-- ✅ ĐÃ SỬA: Thêm điều kiện $product->is_on_sale --}}
+                                @if ($product->sale_price > 0 && $product->sale_price < $product->price && $product->is_on_sale)
+                                    <p class="mb-1 fw-bold text-danger h5">{{ number_format($product->sale_price, 0, ',', '.') }} VNĐ</p>
+                                    <p class="mb-0 text-muted text-decoration-line-through small">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
+                                @else
+                                    <p class="mb-1 fw-bold text-primary h5">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
+                                @endif
+                            </div>
 
-                        {{-- Tồn kho --}}
+                        {{-- Tồn kho (Giữ nguyên) --}}
                         <p class="small text-muted mt-auto">
-                            Tồn kho: <span class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">{{ $product->stock > 0 ? 'Còn hàng' : 'Hết hàng' }}</span>
+                            Trạng thái: <span class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">{{ $product->stock > 0 ? 'Còn hàng' : 'Hết hàng' }}</span>
                         </p>
                         
-                        {{-- ✨ THÊM NÚT THÊM VÀO GIỎ HÀNG (ĐÃ ĐỒNG NHẤT) ✨ --}}
+                        {{-- NÚT THÊM VÀO GIỎ HÀNG (Giữ nguyên) --}}
                         @if ($product->stock > 0)
                             <form action="{{ route('cart.add') }}" method="POST" class="mt-2">
                             @csrf
-                            {{-- Truyền ID sản phẩm và số lượng mặc định 1 --}}
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1"> 
-        
                             <button type="submit" class="btn btn-primary w-100 fw-bold">
                                 <i class="bi bi-cart-plus me-1"></i> Thêm vào Giỏ
                             </button>
                             </form>
-                            @else
-                            {{-- Sử dụng BUTTON disabled cho đồng nhất và rõ ràng hơn --}}
+                        @else
                             <button class="btn btn-secondary w-100 fw-bold mt-2" type="button" disabled>
                                 <i class="bi bi-x-circle me-1"></i> Hết hàng
                             </button>
-                            @endif
+                        @endif
                         
                     </div>
                 </div>
@@ -81,15 +144,15 @@
         @empty
             <div class="col-12 text-center py-5">
                 <div class="alert alert-info" role="alert">
-                    Hiện tại chưa có sản phẩm nào được công khai.
+                    Hiện tại chưa có sản phẩm nào phù hợp với bộ lọc.
                 </div>
             </div>
         @endforelse
     </div>
     
-    {{-- Phân trang --}}
+    {{-- Phân trang (Giữ nguyên) --}}
     <div class="mt-4">
-        {{ $products->links() }}
+        {{ $products->appends(request()->query())->links() }} 
     </div>
 </div>
 @endsection

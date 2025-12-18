@@ -54,7 +54,6 @@
                     </div>
                 </div>
 
-                <!-- Bảng Danh Sách Sản Phẩm -->
                 <div class="card shadow-lg border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -62,10 +61,12 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th>ID</th>
-                                        <th>Ảnh</th> {{-- CỘT MỚI --}}
+                                        <th>SKU</th> {{-- CỘT MỚI: SKU --}}
+                                        <th>Ảnh</th>
                                         <th>Tên Sản Phẩm</th>
                                         <th>Danh Mục</th>
                                         <th>Giá Bán</th>
+                                        <th>Giá Khuyến Mãi</th> {{-- CỘT MỚI: GIÁ KHUYẾN MÃI --}}
                                         <th>Tồn Kho</th>
                                         <th>Trạng Thái</th>
                                         <th class="text-center">Thao Tác</th>
@@ -75,6 +76,7 @@
                                     @forelse ($products as $product)
                                         <tr>
                                             <td>{{ $product->id }}</td>
+                                            <td>{{ $product->sku }}</td> {{-- HIỂN THỊ SKU --}}
                                             {{-- HIỂN THỊ HÌNH ẢNH --}}
                                             <td>
                                                 @if ($product->thumbnail)
@@ -88,31 +90,65 @@
                                             <td>{{ $product->name }}</td>
                                             <td>{{ $product->category->name ?? 'Không có' }}</td>
                                             <td>{{ number_format($product->price) }} VNĐ</td>
+                                            {{-- ✅ ĐÃ SỬA: Thêm ID để JS cập nhật động --}}
+                                            <td id="sale-price-display-{{ $product->id }}">
+                                                {{-- HIỂN THỊ GIÁ KHUYẾN MÃI (CHỈ HIỂN THỊ NẾU CÓ VÀ ĐANG BẬT) --}}
+                                                @if ($product->sale_price > 0)
+                                                    <span class="text-danger fw-bold">{{ number_format($product->sale_price) }} VNĐ</span>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
                                             <td>{{ $product->stock }}</td>
+                                            {{-- Cột Trạng Thái --}}
                                             <td>
-                                                {{-- SỬ DỤNG ENUM 'status' VÀ NÚT CHUYỂN ĐỔI (SWITCH) --}}
-            <div class="form-check form-switch d-inline-block">
-                <input class="form-check-input status-toggle" type="checkbox" role="switch"
-                    id="status-{{ $product->id }}"
-                    data-product-id="{{ $product->id }}"
-                    data-toggle-url="{{ route('admin.products.toggle_status', $product) }}"
-                    {{ $product->status === 'published' ? 'checked' : '' }}>
+                                            {{-- ✅ ĐÃ SỬA: Dùng d-flex flex-column để đặt 2 trạng thái (Active và Sale) xếp chồng --}}
+                                                <div class="d-flex flex-column align-items-start gap-1">
+        
+                                                {{-- 1. Trạng thái Hoạt Động/Tạm ẩn (status) --}}
+                                                <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                                                <input class="form-check-input status-toggle m-0" type="checkbox" role="switch"
+                                                    id="status-{{ $product->id }}"
+                                                    data-product-id="{{ $product->id }}"
+                                                    data-toggle-url="{{ route('admin.products.toggle_status', $product) }}"
+                                                    {{ $product->status === 'published' ? 'checked' : '' }}>
 
-                {{-- Label hiển thị trạng thái --}}
-                <label class="form-check-label" for="status-{{ $product->id }}">
-                    <span id="status-label-{{ $product->id }}"
-                        class="badge {{ $product->status === 'published' ? 'bg-success' : 'bg-secondary' }}">
-                        {{ $product->status === 'published' ? 'Hoạt động' : 'Tạm ẩn' }}
+                                                {{-- Label hiển thị trạng thái --}}
+                                                <label class="form-check-label ms-2" for="status-{{ $product->id }}">
+                                                    <span id="status-label-{{ $product->id }}"
+                                                        class="badge {{ $product->status === 'published' ? 'bg-success' : 'bg-secondary' }}">
+                                                        {{ $product->status === 'published' ? 'Hoạt động' : 'Tạm ẩn' }}
+                                                    </span>
+                                                </label>
+                                                </div>
+
+                                            {{-- 2. Trạng thái Giá Khuyến Mãi (is_on_sale) --}}
+                                        @if ($product->sale_price > 0)
+            <div class="form-check form-switch p-0 m-0 d-flex align-items-center">
+                <input class="form-check-input sale-toggle m-0" type="checkbox" role="switch"
+                    id="sale-status-{{ $product->id }}"
+                    data-product-id="{{ $product->id }}"
+                    data-toggle-url="{{ route('admin.products.toggle_sale', $product) }}"
+                    {{ $product->is_on_sale ? 'checked' : '' }}>
+                
+                <label class="form-check-label ms-2" for="sale-status-{{ $product->id }}">
+                    <span id="sale-label-{{ $product->id }}"
+                        class="badge {{ $product->is_on_sale ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                        {{ $product->is_on_sale ? 'Đang Sale' : 'Tắt Sale' }}
                     </span>
                 </label>
             </div>
-            {{-- Hiển thị cảnh báo Hết hàng nếu status là 'published' nhưng stock <= 0 --}}
-            @if ($product->status === 'published' && $product->stock <= 0)
-                <div id="stock-warning-{{ $product->id }}" class="text-danger small mt-1">Hết hàng!</div>
-            @else
-                <div id="stock-warning-{{ $product->id }}" class="text-danger small mt-1" style="display: none;">Hết hàng!</div>
-            @endif
-                                            </td>
+        @endif
+
+        {{-- Cảnh báo Hết hàng (Giữ nguyên) --}}
+        @if ($product->status === 'published' && $product->stock <= 0)
+            <div id="stock-warning-{{ $product->id }}" class="text-danger small w-100">Hết hàng!</div>
+        @else
+            <div id="stock-warning-{{ $product->id }}" class="text-danger small w-100" style="display: none;">Hết hàng!</div>
+        @endif
+        
+    </div>
+</td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1">
                                                     <a href="{{ route('admin.products.edit', $product) }}"
@@ -129,7 +165,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center py-4 text-muted">
+                                            <td colspan="10" class="text-center py-4 text-muted"> {{-- ĐÃ SỬA colspan TỪ 8 LÊN 10 --}}
                                                 Chưa có sản phẩm nào được tạo.
                                             </td>
                                         </tr>
@@ -153,58 +189,110 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-        // Xử lý sự kiện khi nút switch được thay đổi
-        $('.status-toggle').on('change', function() {
-            let checkbox = $(this);
-            let productId = checkbox.data('product-id');
-            let toggleUrl = checkbox.data('toggle-url');
-            let isChecked = checkbox.prop('checked');
-            let statusLabel = $('#status-label-' + productId);
-            let stockWarning = $('#stock-warning-' + productId);
+    // Xử lý sự kiện khi nút switch Trạng thái chính được thay đổi
+    $('.status-toggle').on('change', function() {
+        let checkbox = $(this);
+        let productId = checkbox.data('product-id');
+        let toggleUrl = checkbox.data('toggle-url');
+        let isChecked = checkbox.prop('checked');
+        let statusLabel = $('#status-label-' + productId);
+        let stockWarning = $('#stock-warning-' + productId);
 
-            // Tạm thời disable nút để tránh spam
-            checkbox.prop('disabled', true);
+        // Tạm thời disable nút để tránh spam
+        checkbox.prop('disabled', true);
 
-            // Thực hiện yêu cầu AJAX
-            $.ajax({
-                url: toggleUrl,
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}', // Đảm bảo có CSRF token
-                    _method: 'POST',
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Cập nhật label và class
-                        statusLabel.text(response.status_label);
-                        statusLabel.removeClass('bg-success bg-secondary').addClass(response.status_class);
+        // Thực hiện yêu cầu AJAX
+        $.ajax({
+            url: toggleUrl,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}', // Đảm bảo có CSRF token
+                _method: 'POST',
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Cập nhật label và class
+                    statusLabel.text(response.status_label);
+                    statusLabel.removeClass('bg-success bg-secondary').addClass(response.status_class);
 
-                        // Xử lý cảnh báo hết hàng
-                        if (response.new_status === 'published' && response.stock <= 0) {
-                            stockWarning.show();
-                        } else {
-                            stockWarning.hide();
-                        }
-
-                        // Kích hoạt lại nút
-                        checkbox.prop('disabled', false);
-
+                    // Xử lý cảnh báo hết hàng
+                    if (response.new_status === 'published' && response.stock <= 0) {
+                        stockWarning.show();
                     } else {
-                        // Quay lại trạng thái ban đầu nếu thất bại
-                        checkbox.prop('checked', !isChecked);
-                        alert('Có lỗi xảy ra: ' + (response.message || 'Lỗi không xác định.'));
-                        checkbox.prop('disabled', false);
+                        stockWarning.hide();
                     }
-                },
-                error: function(xhr) {
-                    // Quay lại trạng thái ban đầu nếu lỗi
+
+                    // Kích hoạt lại nút
+                    checkbox.prop('disabled', false);
+
+                } else {
+                    // Quay lại trạng thái ban đầu nếu thất bại
                     checkbox.prop('checked', !isChecked);
-                    alert('Lỗi kết nối hoặc quyền truy cập. Vui lòng kiểm tra console.');
-                    console.error(xhr.responseText);
+                    alert('Có lỗi xảy ra: ' + (response.message || 'Lỗi không xác định.'));
                     checkbox.prop('disabled', false);
                 }
-            });
+            },
+            error: function(xhr) {
+                // Quay lại trạng thái ban đầu nếu lỗi
+                checkbox.prop('checked', !isChecked);
+                alert('Lỗi kết nối hoặc quyền truy cập. Vui lòng kiểm tra console.');
+                console.error(xhr.responseText);
+                checkbox.prop('disabled', false);
+            }
         });
     });
+
+    // ✅ BỔ SUNG: Xử lý sự kiện khi nút switch Giá Khuyến Mãi được thay đổi
+    $('.sale-toggle').on('change', function() {
+        let checkbox = $(this);
+        let productId = checkbox.data('product-id');
+        let toggleUrl = checkbox.data('toggle-url');
+        let isChecked = checkbox.prop('checked');
+        let saleLabel = $('#sale-label-' + productId);
+        let salePriceDisplay = $('#sale-price-display-' + productId); // ✅ THÊM: Biến này
+
+        // Tạm thời disable nút để tránh spam
+        checkbox.prop('disabled', true);
+
+        // Thực hiện yêu cầu AJAX
+        $.ajax({
+            url: toggleUrl,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}', // Đảm bảo có CSRF token
+                _method: 'POST',
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Cập nhật label và class
+                    saleLabel.text(response.status_label);
+                    // Dùng remove/add class để chuyển đổi giữa trạng thái Đang Sale và Tắt Sale
+                    saleLabel.removeClass('bg-warning bg-secondary text-dark').addClass(response.status_class);
+
+                    // ✅ CẬP NHẬT GIÁ KHUYẾN MÃI TRONG BẢNG ADMIN
+                    if (response.new_status) {
+                        // Nếu đang bật sale, hiển thị giá sale
+                        salePriceDisplay.html('<span class="text-danger fw-bold">' + response.sale_price_formatted + '</span>');
+                    } else {
+                        // Nếu tắt sale, hiển thị "-"
+                        salePriceDisplay.html('-');
+                    }
+                } else {
+                    // Quay lại trạng thái ban đầu nếu thất bại
+                    checkbox.prop('checked', !isChecked);
+                    alert('Có lỗi xảy ra: ' + (response.message || 'Lỗi không xác định.'));
+                }
+                checkbox.prop('disabled', false);
+            },
+            error: function(xhr) {
+                // Quay lại trạng thái ban đầu nếu lỗi
+                checkbox.prop('checked', !isChecked);
+                alert('Lỗi kết nối hoặc quyền truy cập. Vui lòng kiểm tra console.');
+                console.error(xhr.responseText);
+                checkbox.prop('disabled', false);
+            }
+        });
+    });
+});
 </script>
 @endpush

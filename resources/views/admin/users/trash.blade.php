@@ -23,7 +23,7 @@
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-warning">Danh sách User đã xóa mềm</h6>
                 <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    <i class="bi bi-arrow-left"></i> Quay lại
                 </a>
             </div>
             <div class="card-body">

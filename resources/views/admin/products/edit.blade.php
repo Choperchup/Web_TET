@@ -1,14 +1,17 @@
 @extends('layouts.admin.main')
 
+@section('title', 'Chỉnh sửa Sản phẩm') {{-- Thêm title cho đồng bộ --}}
+
 @section('admin_content')
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-lg-10 mx-auto">
+                {{-- Dùng biến $product từ Controller truyền sang --}}
                 <h1 class="mb-4 text-dark">Chỉnh sửa Sản Phẩm: {{ $product->name }}</h1>
 
                 <div class="card shadow-lg">
                     <div class="card-body p-4">
-                        {{-- THAY ĐỔI: Thêm enctype="multipart/form-data" để upload file --}}
+                        {{-- Quan trọng: Thêm enctype="multipart/form-data" để upload file --}}
                         <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -57,9 +60,9 @@
                                     @enderror
                                 </div>
 
-                                {{-- Giá Bán --}}
+                                {{-- Giá Bán Gốc --}}
                                 <div class="col-md-6 mb-3">
-                                    <label for="price" class="form-label">Giá Bán (VNĐ) <span
+                                    <label for="price" class="form-label">Giá Bán Gốc (VNĐ) <span
                                             class="text-danger">*</span></label>
                                     <input type="number" name="price" id="price"
                                         value="{{ old('price', $product->price) }}" required
@@ -68,6 +71,29 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                {{-- ✨ Bổ sung: Giá Khuyến Mãi/Sale Price --}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="sale_price" class="form-label">Giá Khuyến Mãi (VNĐ) <span class="text-muted">(Không bắt buộc)</span></label>
+                                    <input type="number" name="sale_price" id="sale_price"
+                                        value="{{ old('sale_price', $product->sale_price) }}"
+                                        class="form-control @error('sale_price') is-invalid @enderror">
+                                    @error('sale_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                {{-- ✅ BỔ SUNG: SKU (Mã Sản Phẩm) --}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU (Mã Sản Phẩm)</label>
+                                    <input type="text" name="sku" id="sku"
+                                        value="{{ old('sku', $product->sku) }}"
+                                        class="form-control @error('sku') is-invalid @enderror">
+                                    @error('sku')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- END BỔ SUNG: SKU --}}
 
                                 {{-- Tồn Kho --}}
                                 <div class="col-md-6 mb-3">
@@ -100,21 +126,37 @@
                                     @endif
                                 </div>
 
-                                {{-- Trạng thái (Hoạt động/Tạm ẩn) --}}
+                                {{-- ✨ Bổ sung: Trạng thái (Hoạt động/Tạm ẩn) và Nổi bật (Đồng bộ với Create) --}}
                                 <div class="col-md-6 mb-3 d-flex align-items-center pt-4">
-                                    <div class="form-check form-switch">
+                                    <div class="form-check form-switch me-4">
+                                        {{-- is_active: nếu là 'published' thì checked --}}
                                         <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
-                                            value="1" {{ old('is_active', $product->is_active) ? 'checked' : '' }}>
+                                            value="1" {{ old('is_active', $product->status == 'published') ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">Kích hoạt (Hiển thị ra ngoài)</label>
                                     </div>
-                                    @error('is_active')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+
+                                    {{-- ✨ Bổ sung: Sản phẩm Nổi bật --}}
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured"
+                                            value="1" {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_featured">Sản phẩm Nổi bật</label>
+                                    </div>
+                                </div>
+
+                                {{-- ✨ Bổ sung: Mô tả Ngắn --}}
+                                <div class="col-12 mb-4">
+                                    <label for="short_description" class="form-label">Mô tả Ngắn (Hiển thị tóm tắt)</label>
+                                    <textarea name="short_description" id="short_description" rows="2"
+                                        class="form-control @error('short_description') is-invalid @enderror">{{ old('short_description', $product->short_description) }}</textarea>
+                                    @error('short_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                {{-- Mô tả --}}
+                                {{-- Mô tả Chi tiết/Nội dung --}}
                                 <div class="col-12 mb-4">
-                                    <label for="content" class="form-label">Mô tả Sản Phẩm</label>
+                                    <label for="content" class="form-label">Nội dung Chi tiết Sản Phẩm</label>
+                                    {{-- Đã bỏ dấu * vì nội dung chi tiết thường không bắt buộc tuyệt đối --}}
                                     <textarea name="content" id="content" rows="5"
                                         class="form-control @error('content') is-invalid @enderror">{{ old('content', $product->content) }}</textarea>
                                     @error('content')

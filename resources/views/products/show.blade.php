@@ -37,10 +37,10 @@
 
                 {{-- Thông tin khác --}}
                 <ul class="list-unstyled mb-4">
-                    <li>**Danh mục:** <span class="fw-semibold">{{ $product->category->name ?? 'Chưa phân loại' }}</span>
+                    <li>Danh mục: <span class="fw-semibold">{{ $product->category->name ?? 'Chưa phân loại' }}</span>
                     </li>
-                    <li>**SKU:** {{ $product->sku }}</li>
-                    <li>**Trạng thái:** <span
+                    <li>Mã sản phẩm: {{ $product->sku }}</li>
+                    <li>Trạng thái: <span
                             class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">{{ $product->stock > 0 ? 'Còn hàng' : 'Hết hàng' }}</span>
                     </li>
                 </ul>

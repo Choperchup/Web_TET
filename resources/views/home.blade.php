@@ -23,30 +23,40 @@
                         
                         {{-- Ảnh sản phẩm --}}
                         <div class="product-image-container">
-                            @if ($product->thumbnail)
-                                <img src="{{ asset('storage/' . $product->thumbnail) }}" class="card-img-top" alt="{{ $product->name }}" loading="lazy">
-                            @else
-                                <img src="https://via.placeholder.com/400x300?text=No+Image" class="card-img-top" alt="No Image">
-                            @endif
-                            
-                            {{-- Badge nổi bật --}}
-                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Nổi bật</span>
+                            <a href="{{ route('products.show', $product->slug) }}" class="d-block w-100 h-100 position-relative">
+                                @if ($product->thumbnail)
+                                    <img src="{{ asset('storage/' . $product->thumbnail) }}" class="card-img-top" alt="{{ $product->name }}" loading="lazy">
+                                @else
+                                    <img src="https://via.placeholder.com/400x300?text=No+Image" class="card-img-top" alt="No Image">
+                                @endif
+                                
+                                {{-- ✅ ĐÃ SỬA: Bổ sung các Badge đồng bộ --}}
+                                
+                                {{-- Badge nổi bật (Giữ nguyên) --}}
+                                @if ($product->is_featured)
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Nổi bật</span>
+                                @endif
+
+                                {{-- ✅ ĐÃ THÊM: Badge Sale chỉ hiện khi is_on_sale là TRUE --}}
+                                @if ($product->sale_price < $product->price && $product->sale_price > 0 && $product->is_on_sale)
+                                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">SALE</span>
+                                @endif
+                            </a>
                         </div>
 
                         <div class="card-body d-flex flex-column">
-                            {{-- Tên danh mục --}}
-                            <small class="text-muted">{{ $product->category->name ?? 'Không danh mục' }}</small>
                             
                             {{-- Tên sản phẩm --}}
                             <h5 class="card-title mt-1">
-                                <a href="{{ route('products.show', $product->slug) }}" class="text-dark text-decoration-none">
+                                <a href="{{ route('products.show', $product->slug) }}" class="text-dark text-decoration-none hover-text-primary">
                                     {{ Str::limit($product->name, 50) }}
                                 </a>
                             </h5>
                             
                             {{-- Giá sản phẩm --}}
                             <div class="mt-auto">
-                                @if ($product->sale_price > 0 && $product->sale_price < $product->price)
+                                {{-- ✅ ĐÃ SỬA: Thêm điều kiện $product->is_on_sale --}}
+                                @if ($product->sale_price > 0 && $product->sale_price < $product->price && $product->is_on_sale)
                                     <p class="mb-1 fw-bold text-danger h5">{{ number_format($product->sale_price, 0, ',', '.') }} VNĐ</p>
                                     <p class="mb-0 text-muted text-decoration-line-through small">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
                                 @else
@@ -57,12 +67,12 @@
                         
                         {{-- Footer Card (Action Buttons) --}}
                         <div class="card-footer bg-transparent border-0 pt-0 pb-3 text-center">
-                            {{-- Form Thêm vào giỏ hàng (Giả định Route Cart) --}}
+                            {{-- Form Thêm vào giỏ hàng --}}
                             <form action="{{ route('cart.add') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1"> 
-                                <button type="submit" class="btn btn-warning btn-sm w-100">
+                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
                                     <i class="fas fa-shopping-cart me-2"></i> Thêm vào giỏ hàng
                                 </button>
                             </form>

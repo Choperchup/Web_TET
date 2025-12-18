@@ -113,6 +113,10 @@ Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
 
     // toggle status
     Route::post('/dashboard/products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('admin.products.toggle_status');
+
+    // toggle sale
+    Route::post('/dashboard/products/{product}/toggle-sale', [AdminProductController::class, 'toggleSale'])
+        ->name('admin.products.toggle_sale');
 });
 
 Route::middleware('auth', 'admin')->prefix('admin')->group(function () {

@@ -74,6 +74,7 @@ class AdminProductController extends Controller
             'name',
             'category_id',
             'price',
+            'sale_price', // ĐÃ THÊM: sale_price
             'sku',
             'content', // Tên cột DB, được gửi từ form
             'short_description', // Tên cột DB, đã thêm vào form
@@ -132,6 +133,7 @@ class AdminProductController extends Controller
             'name',
             'category_id',
             'price',
+            'sale_price', // ĐÃ THÊM: sale_price
             'sku',
             'content',
             'short_description',
@@ -226,6 +228,35 @@ class AdminProductController extends Controller
             'status_class' => $product->status === 'published' ? 'bg-success' : 'bg-secondary',
             'message' => 'Cập nhật trạng thái sản phẩm thành công.',
             'stock' => $product->stock, // Trả về tồn kho để hiển thị cảnh báo
+        ]);
+    }
+
+    /**
+     * Chuyển đổi trạng thái hiển thị giá khuyến mãi của sản phẩm (is_on_sale).
+     */
+    public function toggleSale(Products $product)
+    {
+        // Kiểm tra xem sản phẩm có sale_price hay không
+        if ($product->sale_price <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sản phẩm này không có giá khuyến mãi để bật/tắt.',
+            ], 400);
+        }
+
+        // Đảo ngược trạng thái is_on_sale
+        $product->is_on_sale = ! $product->is_on_sale;
+        $product->save();
+
+        $isOnSale = $product->is_on_sale;
+
+        return response()->json([
+            'success' => true,
+            'new_status' => $isOnSale,
+            'status_label' => $isOnSale ? 'Đang Sale' : 'Tắt Sale',
+            'status_class' => $isOnSale ? 'bg-warning text-dark' : 'bg-secondary',
+            'message' => 'Trạng thái Sale đã được cập nhật.',
+            'sale_price_formatted' => number_format($product->sale_price) . ' VNĐ',
         ]);
     }
 

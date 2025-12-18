@@ -18,20 +18,9 @@
 
                 <!-- Quản lý Sản phẩm & Thêm Sản phẩm (Dropdown) -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="productDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link text-white" href="{{ route('admin.products.index') }}">
                         <i class="bi bi-box-fill me-1"></i> Quản lý Sản phẩm
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="productDropdown">
-                        <!-- Quản lý Sản phẩm (Danh sách) -->
-                        <li><a class="dropdown-item" href="{{ route('admin.products.index') }}">
-                                <i class="bi bi-list-columns me-2"></i> Danh sách Sản phẩm
-                            </a></li>
-                        <!-- Thêm Sản phẩm -->
-                        <li><a class="dropdown-item" href="#">
-                                <i class="bi bi-plus-circle-fill me-2"></i> Thêm Sản phẩm mới
-                            </a></li>
-                    </ul>
                 </li>
 
                 <!-- Quản lý Bài viết -->

@@ -9,11 +9,11 @@
 
         <div class="collapse navbar-collapse justify-content-center" id="navbarMenu">
             <ul class="navbar-nav gap-3">
-                <li class="nav-item"><a class="nav-link text-white" href="{{ route('products.index') }}">Giỏ quà Tết</a>
+                <li class="nav-item"><a class="nav-link text-white" href="{{ route('products.index') }}">Sản Phẩm</a>
                 </li>
                 <li class="nav-item"><a class="nav-link text-white" href="#">Hộp quà Tết</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="#">Giới thiệu</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{{ route('posts.index') }}">Blog Tết</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="{{ route('posts.index') }}">Blog</a></li>
             </ul>
         </div>
 
@@ -35,12 +35,12 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
                         <li>
                             <a class="dropdown-item" href="
-                                                                                            @if(Auth::user()->role == 'admin')
-                                                                                                {{ route('admin.dashboard') }}
-                                                                                            @else
-                                                                                                {{ route('user.profile') }}
-                                                                                            @endif
-                                                                                        ">
+                                                                                                            @if(Auth::user()->role == 'admin')
+                                                                                                                {{ route('admin.dashboard') }}
+                                                                                                            @else
+                                                                                                                {{ route('user.profile') }}
+                                                                                                            @endif
+                                                                                                        ">
                                 <i class="bi bi-speedometer me-2"></i>
                                 @if(Auth::user()->role == 'admin')
                                     Trang quản trị
