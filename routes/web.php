@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderTrackingController;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -85,3 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
     Route::put('/password/update', [UserController::class, 'updatePassword'])->name('user.password.update');
 });
+
+// CÁC ROUTE CHO HỆ THỐNG CHAT
+Route::get('/chat/history', [ChatController::class, 'getMessages']);
+Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');

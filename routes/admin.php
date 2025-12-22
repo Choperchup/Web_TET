@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminProductCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminChatController;
+
 
 Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -125,4 +127,12 @@ Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
     Route::post('/dashboard/orders/{order}/confirm', [AdminOrderController::class, 'confirm'])->name('admin.orders.confirm');
     Route::post('/dashboard/orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('admin.orders.cancel');
     Route::put('/dashboard/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+});
+
+// CÁC ROUTE CHO HỆ THỐNG CHAT
+Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
+    Route::get('/chat', [AdminChatController::class, 'index'])->name('admin.chat.index');
+    Route::get('/chat/messages/{id}', [AdminChatController::class, 'getConversationMessages'])->name('admin.chat.conversation');
+    Route::post('/chat/reply', [AdminChatController::class, 'reply'])->name('admin.chat.reply');
+    Route::delete('/chat/delete/{id}', [AdminChatController::class, 'deleteConversation'])->name('admin.chat.deleteConversation');
 });

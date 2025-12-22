@@ -60,8 +60,13 @@
                         <i class="bi bi-people-fill me-1"></i> Quản lý Người dùng
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.chat.index') }}" class="nav-link text-white">
+                        <i class="bi bi-chat-dots-fill me-1"></i> Tin nhắn
+                    </a>
+                </li>
             </ul>
-
+            
             <!-- Phần Admin User/Logout bên phải -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
