@@ -23,6 +23,23 @@ class ChatController extends Controller
         return response()->json(['status' => 'success', 'data' => $message]);
     }
 
+    // 2. Thu hồi tin nhắn (Mới)
+    public function recallMessage($id)
+    {
+        $message = Message::findOrFail($id);
+
+        // Kiểm tra quyền: Chỉ cho phép người gửi thu hồi trong phiên hiện tại
+        $isOwner = (Auth::check() && $message->user_id == Auth::id()) || ($message->session_id == session()->getId());
+
+        if ($isOwner) {
+            $oldContent = $message->message;
+            $message->delete(); // Xóa khỏi Database
+            return response()->json(['success' => true, 'content' => $oldContent]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Không có quyền thu hồi'], 403);
+    }
+
     // 2. Lấy lại lịch sử chat khi khách load lại trang
     public function getMessages()
     {

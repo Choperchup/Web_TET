@@ -17,6 +17,10 @@ class ProductController extends Controller
         // 1. Lấy tất cả danh mục (cho phần lọc sidebar)
         $categories = ProductCategory::all();
 
+        $query = Products::with(['category', 'images']) // Load thêm album ảnh
+            ->where('status', 'published')
+            ->latest();
+
         // 2. Bắt đầu query
         $query = Products::with('category')
             ->where('status', 'published')
@@ -99,7 +103,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         // 1. Tìm sản phẩm theo slug và đảm bảo trạng thái là 'published'
-        $product = Products::with('category', 'author') // Eager load category và author
+        $product = Products::with('category', 'author', 'images') // Eager load category và author
             ->where('slug', $slug)
             ->where('status', 'published') // Đảm bảo sản phẩm đang hoạt động
             ->firstOrFail();

@@ -90,3 +90,4 @@ Route::middleware('auth')->group(function () {
 // CÁC ROUTE CHO HỆ THỐNG CHAT
 Route::get('/chat/history', [ChatController::class, 'getMessages']);
 Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+Route::delete('/chat/recall/{id}', [ChatController::class, 'recallMessage'])->name('chat.recall');

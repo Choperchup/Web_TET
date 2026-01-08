@@ -10,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        /* CSS cho nút Chat tròn */
+        /* --- CSS GIAO DIỆN CHAT --- */
         #chat-circle {
             position: fixed;
             bottom: 20px;
@@ -26,11 +26,6 @@
             transition: all 0.3s ease;
         }
 
-        #chat-circle:hover {
-            transform: scale(1.1);
-        }
-
-        /* CSS cho khung Chat */
         .chat-box {
             position: fixed;
             bottom: 90px;
@@ -41,7 +36,6 @@
             border-radius: 15px;
             z-index: 1000;
             display: none;
-            /* Ẩn mặc định */
             flex-direction: column;
             overflow: hidden;
         }
@@ -52,10 +46,19 @@
             background-color: #f8f9fa;
         }
 
-        /* Bong bóng tin nhắn */
+        /* --- BỐ CỤC TIN NHẮN --- */
         .message-sent {
-            text-align: right;
+            display: flex;
+            justify-content: flex-end;
             margin-bottom: 15px;
+            padding-left: 60px;
+            padding-right: 10px;
+        }
+
+        .message-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
         }
 
         .message-sent .text {
@@ -63,13 +66,15 @@
             color: white;
             padding: 8px 12px;
             border-radius: 15px 15px 0 15px;
-            display: inline-block;
-            max-width: 80%;
+            word-wrap: break-word;
         }
 
         .message-received {
-            text-align: left;
+            display: flex;
+            justify-content: flex-start;
             margin-bottom: 15px;
+            padding-right: 60px;
+            padding-left: 10px;
         }
 
         .message-received .text {
@@ -77,9 +82,65 @@
             color: #333;
             padding: 8px 12px;
             border-radius: 15px 15px 15px 0;
-            display: inline-block;
-            max-width: 80%;
+            word-wrap: break-word;
         }
+
+        /* --- NÚT 3 CHẤM (CHỈ HIỆN KHI HOVER) --- */
+        .msg-options-container {
+            margin-right: 8px;
+            opacity: 0; /* Mặc định ẩn */
+            transition: opacity 0.2s ease;
+            position: relative;
+        }
+
+        .message-sent:hover .msg-options-container {
+            opacity: 1; /* Hiện khi di chuột vào tin nhắn */
+        }
+
+        .btn-msg-menu {
+            cursor: pointer;
+            color: #adb5bd;
+            font-size: 1.1rem;
+            padding: 4px;
+        }
+
+        /* --- DROPDOWN MENU TÁCH BIỆT --- */
+        .msg-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            min-width: 120px;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+
+        .msg-dropdown.show {
+            display: block;
+        }
+
+        .msg-dropdown-item {
+            padding: 10px 15px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        /* Màu sắc riêng cho Chỉnh sửa và Thu hồi */
+        .item-edit { color: #007bff; border-bottom: 1px solid #f8f9fa; }
+        .item-edit:hover { background-color: #f0f7ff; }
+
+        .item-recall { color: #dc3545; }
+        .item-recall:hover { background-color: #fff1f0; }
+
+        .msg-dropdown-item i { margin-right: 8px; }
     </style>
 </head>
 
@@ -106,16 +167,11 @@
             <button type="button" class="btn-close btn-close-white" id="chat-box-toggle"></button>
         </div>
 
-        <div class="chat-box-body p-3" id="chat-content">
-            <div class="message-received">
-                <div class="text small shadow-sm">Chào bạn! Shop có thể giúp gì cho bạn ạ?</div>
-            </div>
-        </div>
+        <div class="chat-box-body p-3" id="chat-content"></div>
 
         <div class="chat-box-footer p-2 border-top bg-white">
             <div class="input-group">
-                <input type="text" id="chat-input" class="form-control border-0" placeholder="Nhập tin nhắn..."
-                    autocomplete="off">
+                <input type="text" id="chat-input" class="form-control border-0" placeholder="Nhập tin nhắn..." autocomplete="off">
                 <button class="btn btn-link text-primary" id="chat-submit">
                     <i class="bi bi-send-fill fs-5"></i>
                 </button>
@@ -134,10 +190,9 @@
             const content = document.getElementById('chat-content');
 
             const GREETING = `<div class="message-received">
-                            <div class="text small shadow-sm">Chào bạn! Shop có thể giúp gì cho bạn ạ?</div>
-                          </div>`;
+                                <div class="text small shadow-sm">Chào bạn! Shop có thể giúp gì cho bạn ạ?</div>
+                              </div>`;
 
-            // Mở khung chat
             chatCircle.onclick = () => {
                 chatBox.style.display = 'flex';
                 loadChatHistory();
@@ -145,73 +200,122 @@
 
             toggle.onclick = () => chatBox.style.display = 'none';
 
-            // Hàm load lịch sử chat
             function loadChatHistory() {
                 fetch("/chat/history")
                     .then(res => res.json())
                     .then(messages => {
-                        // Giữ lại câu chào và render tin nhắn
                         content.innerHTML = GREETING;
                         messages.forEach(msg => {
                             const side = msg.sender_role === 'user' ? 'sent' : 'received';
-                            appendMessage(msg.message, side);
+                            appendMessage(msg.message, side, msg.id);
                         });
                         scrollDown();
                     });
             }
 
-            // Tự động kiểm tra tin nhắn mới mỗi 5 giây (để nhận phản hồi từ Admin)
-            setInterval(() => {
-                if (chatBox.style.display === 'flex') {
-                    loadChatHistory();
-                }
-            }, 5000);
-
-            function appendMessage(text, side) {
-                // Sử dụng div tạm để tránh lỗi XSS và hiển thị an toàn
+            // --- HÀM HIỂN THỊ TIN NHẮN (ĐÃ TÁCH BIỆT CHỈNH SỬA & THU HỒI) ---
+            function appendMessage(text, side, id = null) {
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `message-${side}`;
-                msgDiv.innerHTML = `<div class="text small shadow-sm"></div>`;
-                msgDiv.querySelector('.text').textContent = text; // Gán text an toàn
+                if (id) msgDiv.id = `msg-${id}`;
+
+                let optionsHtml = '';
+                if (side === 'sent' && id) {
+                    optionsHtml = `
+                        <div class="msg-options-container">
+                            <div class="msg-dropdown" id="dropdown-${id}">
+                                <div class="msg-dropdown-item item-edit" onclick="editMessage(${id})">
+                                    <i class="bi bi-pencil-square"></i> Chỉnh sửa
+                                </div>
+                                <div class="msg-dropdown-item item-recall" onclick="recallMessage(${id})">
+                                    <i class="bi bi-trash3"></i> Thu hồi
+                                </div>
+                            </div>
+                            <i class="bi bi-three-dots-vertical btn-msg-menu" onclick="toggleMessageMenu(event, ${id})"></i>
+                        </div>`;
+                }
+
+                msgDiv.innerHTML = `
+                    <div class="message-wrapper">
+                        ${optionsHtml}
+                        <div class="text small shadow-sm">${text}</div>
+                    </div>`;
+
                 content.appendChild(msgDiv);
             }
 
-            function scrollDown() {
-                content.scrollTop = content.scrollHeight;
-            }
+            // --- ĐÓNG MỞ MENU ---
+            window.toggleMessageMenu = function (event, id) {
+                event.stopPropagation();
+                document.querySelectorAll('.msg-dropdown').forEach(el => {
+                    if (el.id !== `dropdown-${id}`) el.classList.remove('show');
+                });
+                const menu = document.getElementById(`dropdown-${id}`);
+                if (menu) menu.classList.toggle('show');
+            };
 
-            // Gửi tin nhắn mới
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.msg-dropdown').forEach(el => el.classList.remove('show'));
+            });
+
+            // --- CHỨC NĂNG 1: CHỈNH SỬA (Thu hồi + đưa text vào ô input) ---
+            window.editMessage = function(id) {
+                fetch(`/chat/recall/${id}`, {
+                    method: "DELETE",
+                    headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const element = document.getElementById(`msg-${id}`);
+                        if (element) element.remove();
+                        // Sửa lỗi undefined bằng cách dùng đúng tên biến từ Controller (content)
+                        input.value = data.content; 
+                        input.focus();
+                    }
+                });
+            };
+
+            // --- CHỨC NĂNG 2: THU HỒI (Chỉ xóa tin nhắn) ---
+            window.recallMessage = function(id) {
+                if (!confirm("Bạn có chắc chắn muốn thu hồi tin nhắn này?")) return;
+                fetch(`/chat/recall/${id}`, {
+                    method: "DELETE",
+                    headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const element = document.getElementById(`msg-${id}`);
+                        if (element) element.remove();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            };
+
             function sendMessage() {
                 let msg = input.value.trim();
                 if (msg === "") return;
-
-                // Hiển thị tạm thời phía khách
-                appendMessage(msg, 'sent');
                 input.value = "";
-                scrollDown();
-
                 fetch("{{ route('chat.send') }}", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
                     body: JSON.stringify({ message: msg })
                 })
-                    .then(res => {
-                        if (!res.ok) alert("Lỗi gửi tin nhắn!");
-                    });
+                .then(res => res.json())
+                .then(response => {
+                    if (response.status === 'success') {
+                        appendMessage(response.data.message, 'sent', response.data.id);
+                        scrollDown();
+                    }
+                });
             }
 
+            function scrollDown() { content.scrollTop = content.scrollHeight; }
             submit.onclick = sendMessage;
-            input.addEventListener("keypress", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault(); // Tránh reload trang
-                    sendMessage();
-                }
-            });
+            input.onkeypress = (e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } };
         });
     </script>
 </body>
-
 </html>

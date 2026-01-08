@@ -119,6 +119,9 @@ Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
     // toggle sale
     Route::post('/dashboard/products/{product}/toggle-sale', [AdminProductController::class, 'toggleSale'])
         ->name('admin.products.toggle_sale');
+
+    // Xóa ảnh lẻ trong Album
+    Route::delete('products/image/{image}', [AdminProductController::class, 'deleteImage'])->name('admin.products.deleteImage');
 });
 
 Route::middleware('auth', 'admin')->prefix('admin')->group(function () {

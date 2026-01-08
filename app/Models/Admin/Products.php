@@ -16,6 +16,7 @@ class Products extends Model
     protected $casts = [
         'is_featured' => 'boolean',
         'is_on_sale' => 'boolean',
+        'sizes' => 'array',
     ];
 
     protected $fillable = [
@@ -35,6 +36,7 @@ class Products extends Model
         'meta_title',
         'meta_description',
         'is_on_sale',
+        'sizes',
     ];
 
     /**
@@ -51,5 +53,13 @@ class Products extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Định nghĩa mối quan hệ: Một sản phẩm có nhiều hình ảnh.
+     */
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'product_id');
     }
 }

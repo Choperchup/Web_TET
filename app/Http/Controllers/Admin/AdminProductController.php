@@ -69,46 +69,43 @@ class AdminProductController extends Controller
      */
     public function store(AdminStoreProductRequest $request)
     {
-        // Vấn đề 1: Đảm bảo trích xuất tất cả các trường cần thiết, bao gồm 'stock'
+        // Thêm 'sizes' vào danh sách lấy dữ liệu
         $data = $request->only([
             'name',
             'category_id',
             'price',
-            'sale_price', // ĐÃ THÊM: sale_price
+            'sale_price',
             'sku',
-            'content', // Tên cột DB, được gửi từ form
-            'short_description', // Tên cột DB, đã thêm vào form
-            'stock', // Thêm trường stock vào dữ liệu lưu
+            'content',
+            'short_description',
+            'stock',
             'meta_title',
             'meta_description',
+            'sizes' // THÊM DÒNG NÀY
         ]);
 
-        // Gán user_id
         $data['user_id'] = Auth::id();
-
-        // Gán is_featured (boolean)
         $data['is_featured'] = $request->boolean('is_featured');
-
-        // Vấn đề 2: Mapping checkbox 'is_active' trong form sang ENUM 'status' trong DB.
-        // Giả định: nếu 'is_active' được check -> 'published', ngược lại -> 'draft'
         $data['status'] = $request->boolean('is_active') ? 'published' : 'draft';
 
-
-        // Tạo slug
         $slug = $request->slug ? Str::slug($request->slug) : Str::slug($request->name);
         $data['slug'] = $this->generateUniqueSlug($slug);
 
-
-        // Bước 2: Xử lý Upload hình ảnh
+        // 1. Lưu thumbnail chính
         if ($request->hasFile('thumbnail')) {
-            // Lưu ảnh vào thư mục 'public/products' và lấy đường dẫn.
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
-        } else {
-            $data['thumbnail'] = null; // Hoặc gán giá trị mặc định nếu cần
+            $data['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
         }
 
-        // Bước 3: Lưu Product vào Database
-        Products::create($data);
+        // 2. Lưu Sản phẩm
+        $product = Products::create($data);
+
+        // 3. Xử lý Album ảnh (Gallery)
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $path = $file->store('products/gallery', 'public');
+                $product->images()->create(['image_path' => $path]);
+            }
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Tạo sản phẩm thành công!');
     }
@@ -133,42 +130,45 @@ class AdminProductController extends Controller
             'name',
             'category_id',
             'price',
-            'sale_price', // ĐÃ THÊM: sale_price
+            'sale_price',
             'sku',
             'content',
             'short_description',
             'stock',
             'meta_title',
             'meta_description',
+            'sizes' // THÊM DÒNG NÀY
         ]);
 
         $data['is_featured'] = $request->boolean('is_featured');
-        $data['status'] = $request->boolean('is_active') ? 'published' : 'draft'; // Sửa logic status
+        $data['status'] = $request->boolean('is_active') ? 'published' : 'draft';
 
-        // Tạo slug duy nhất (chỉ khi slug thay đổi)
-        $newSlug = $request->slug ? Str::slug($request->slug) : Str::slug($request->name);
-        if ($product->slug !== $newSlug) {
-            $data['slug'] = $this->generateUniqueSlug($newSlug, $product->id);
-        } else {
-            $data['slug'] = $product->slug;
-        }
-
-        // Bước 2: Xử lý Upload hình ảnh mới
+        // Xử lý Thumbnail chính
         if ($request->hasFile('thumbnail')) {
-            // Xóa ảnh cũ nếu có
-            if ($product->thumbnail) {
-                Storage::disk('public')->delete($product->thumbnail);
-            }
-            // Lưu ảnh mới
-            $data['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
-        } else {
-            $data['thumbnail'] = $product->thumbnail; // Giữ nguyên ảnh cũ nếu không có ảnh mới
+            if ($product->thumbnail) Storage::disk('public')->delete($product->thumbnail);
+            $data['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
         }
 
-        // Bước 3: Cập nhật Product vào Database
         $product->update($data);
 
-        return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công!');
+        // Xử lý upload thêm ảnh vào Album
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $path = $file->store('products/gallery', 'public');
+                $product->images()->create(['image_path' => $path]);
+            }
+        }
+
+        return redirect()->route('admin.products.index')->with('success', 'Cập nhật thành công!');
+    }
+
+    // Thêm hàm xóa ảnh lẻ trong Album (Dùng cho trang Edit)
+    public function deleteGalleryImage($id)
+    {
+        $image = \App\Models\Admin\ProductImage::findOrFail($id);
+        Storage::disk('public')->delete($image->image_path);
+        $image->delete();
+        return back()->with('success', 'Đã xóa ảnh khỏi album');
     }
 
     /**
