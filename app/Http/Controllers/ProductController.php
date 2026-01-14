@@ -17,6 +17,16 @@ class ProductController extends Controller
         // 1. Lấy tất cả danh mục (cho phần lọc sidebar)
         $categories = ProductCategory::all();
 
+        // Lấy tối đa 5 sản phẩm (Nổi bật HOẶC Đang giảm giá)
+        $hotProducts = Products::where('status', 'published')
+            ->where(function ($q) {
+                $q->where('is_featured', true)
+                    ->orWhere('is_on_sale', true);
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
         $query = Products::with(['category', 'images']) // Load thêm album ảnh
             ->where('status', 'published')
             ->latest();
@@ -94,7 +104,7 @@ class ProductController extends Controller
         $products = $query->paginate(12)->withQueryString();
 
         // 6. Truyền dữ liệu sang view
-        return view('products.index', compact('products', 'categories'));
+        return view('products.index', compact('products', 'categories', 'hotProducts'));
     }
 
     /**

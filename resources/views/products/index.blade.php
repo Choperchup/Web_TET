@@ -80,7 +80,7 @@
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="card h-100 shadow-sm border-0 product-card">
                     {{-- Hình ảnh sản phẩm --}}
-                    <a href="{{ route('products.show', $product->slug) }}" class="position-relative overflow-hidden" style="display: block; height: 250px;">
+                    <a href="{{ route('products.show', $product->slug) }}" class="position-relative overflow-hidden d-block" style="height: 250px;">
                         @if ($product->thumbnail)
                             <img src="{{ asset('storage/' . $product->thumbnail) }}" class="card-img-top h-100 w-100 object-fit-cover" alt="{{ $product->name }}">
                         @else
@@ -129,7 +129,7 @@
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="quantity" value="1"> 
                             <button type="submit" class="btn btn-primary w-100 fw-bold">
-                                <i class="bi bi-cart-plus me-1"></i> Thêm vào Giỏ
+                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
                             </button>
                             </form>
                         @else
@@ -156,3 +156,62 @@
     </div>
 </div>
 @endsection
+
+
+<style>
+    /* 1. Hiệu ứng cho toàn bộ thẻ Card */
+    .product-card {
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Chuyển động mượt */
+        border: 1px solid rgba(0,0,0,.05) !important;
+        background-color: #fff;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px); /* Nhấc lên cao hơn một chút */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important; /* Đổ bóng sâu */
+    }
+
+    /* 2. Hiệu ứng phóng to hình ảnh bên trong */
+    .product-card .overflow-hidden {
+        border-top-left-radius: calc(0.375rem - 1px);
+        border-top-right-radius: calc(0.375rem - 1px);
+    }
+
+    .product-card img.card-img-top {
+        transition: transform 0.6s ease; /* Ảnh phóng to chậm và mượt */
+    }
+
+    .product-card:hover img.card-img-top {
+        transform: scale(1.1); /* Phóng to 10% */
+    }
+
+    /* 3. Hiệu ứng cho tên sản phẩm */
+    .hover-text-primary {
+        transition: color 0.3s ease;
+    }
+
+    .product-card:hover .hover-text-primary {
+        color: #0d6efd !important; /* Đổi màu xanh khi rê vào card */
+    }
+
+    /* 4. Hiệu ứng nút bấm */
+    .product-card .btn {
+        transition: all 0.3s ease;
+        border-radius: 6px;
+    }
+
+    .product-card:hover .btn-primary {
+        transform: scale(1.03);
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    }
+
+    /* 5. Hiệu ứng Badge */
+    .product-card .badge {
+        z-index: 2; /* Đảm bảo badge luôn nằm trên ảnh khi phóng to */
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .badge {
+        transform: scale(1.1);
+    }
+</style>

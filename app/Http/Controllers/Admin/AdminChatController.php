@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Message;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 
 class AdminChatController extends Controller
 {
@@ -75,5 +76,29 @@ class AdminChatController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Lỗi: ' + $e->getMessage()], 500);
         }
+    }
+
+    // Thu hồi tin nhắn đã gửi bởi admin
+    public function recallMessage($id)
+    {
+        // Tìm tin nhắn, nếu không có sẽ trả về lỗi 404
+        $message = Message::find($id);
+
+        if (!$message) {
+            return response::json(['success' => false, 'message' => 'Không tìm thấy tin nhắn'], 404);
+        }
+
+        // Kiểm tra nếu đúng là tin nhắn của admin thì mới cho xóa/thu hồi
+        if ($message->sender_role === 'admin') {
+            $oldContent = $message->message; // Lưu lại nội dung để phục vụ chức năng "Sửa"
+            $message->delete();
+
+            return response()->json([
+                'success' => true,
+                'content' => $oldContent
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Bạn không có quyền thu hồi tin nhắn này'], 403);
     }
 }

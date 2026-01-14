@@ -138,4 +138,5 @@ Route::middleware('auth', 'admin')->prefix('admin')->group(function () {
     Route::get('/chat/messages/{id}', [AdminChatController::class, 'getConversationMessages'])->name('admin.chat.conversation');
     Route::post('/chat/reply', [AdminChatController::class, 'reply'])->name('admin.chat.reply');
     Route::delete('/chat/delete/{id}', [AdminChatController::class, 'deleteConversation'])->name('admin.chat.deleteConversation');
+    Route::delete('/chat/recall/{id}', [AdminChatController::class, 'recallMessage'])->name('admin.chat.recallMessage');
 });

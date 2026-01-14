@@ -148,7 +148,10 @@
     @include('layouts.navbar')
 
     <main class="container my-5">
-        @include('layouts.slider')
+        {{-- Chỉ hiển thị Slider nếu route hiện tại là 'home' --}}
+        @if(Route::is('home'))
+            @include('layouts.slider')
+        @endif
         @yield('content')
     </main>
 
